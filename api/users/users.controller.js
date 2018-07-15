@@ -1,6 +1,25 @@
 const USER = require('./users.model');
+const sendmail = require('sendmail')();
+
+function checkSession(req){
+    if(req.session.views){
+        req.session.views++;
+    } else {
+        req.session.views = 1;
+    }
+    if(req.session.views > 100){
+        sendmail({
+            from: 'no-reply@twitterapi.com',
+            to: "jmontesdeocanuez21@gmail.com",
+            subject: "Warning!",
+            html: "Someone is using your api in an anomalous way. Check it!"
+        })
+
+    }
+}
 
 function getAllUsers(req, res) {
+    checkSession(req);
     USER.find()
         .then(response => {
             res.json(response);
@@ -8,6 +27,7 @@ function getAllUsers(req, res) {
 }
 
 function getUserByUsername(req, res) {
+    checkSession(req);
     const _username = req.params.username;
     USER.findOne({ username: _username })
         .then(response => {
@@ -20,6 +40,7 @@ function getUserByUsername(req, res) {
 }
 
 function deleteUserByUsername(req, res) {
+    checkSession(req);
     const _username = req.params.username;
     USER.findOne({username: _username}, (err, doc) => {
         if(doc){
@@ -32,6 +53,7 @@ function deleteUserByUsername(req, res) {
 }
 
 function modifyUserByUsername(req, res) {
+    checkSession(req);
     const _username = req.params.username;
     if (req.body && req.body.email) {
         USER.findOne({"username": _username}, (err, user) => {
@@ -43,11 +65,11 @@ function modifyUserByUsername(req, res) {
 }
 
 function createUser(req, res) {
+    checkSession(req);
     if (req.body){
         const newUser = new USER(req.body);
         newUser.save()
             .then(response => {
-                const sendmail = require('sendmail')();
                 sendmail({
                     from: 'no-reply@twitterapi.com',
                     to: req.body.email,
