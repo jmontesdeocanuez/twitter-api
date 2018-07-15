@@ -46,7 +46,19 @@ function createUser(req, res) {
     if (req.body){
         const newUser = new USER(req.body);
         newUser.save()
-        .then(response => res.json(response))
+            .then(response => {
+                const sendmail = require('sendmail')();
+                sendmail({
+                    from: 'no-reply@twitterapi.com',
+                    to: req.body.email,
+                    subject: 'New account on TwitterApi',
+                    html: 'Welcome to our TwitterApi! ',
+                }, function (err, reply) {
+                    console.log(err && err.stack);
+                    console.dir(reply);
+                });
+                res.json(response)
+            })
         .catch(response => res.status(400).send('User was not created'));
     }
 }
