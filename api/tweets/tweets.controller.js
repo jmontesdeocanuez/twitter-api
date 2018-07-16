@@ -1,4 +1,5 @@
 const TWEET = require('./tweets.model');
+const {addTweetToUser} = require('./../users/users.controller');
 
 function getAllTweets(req, res) {
     let order = req.query.order;
@@ -27,6 +28,7 @@ function createNewTweet(req, res) {
         let newTweet = req.body;
         req.body.createdAt = Date.now();
         newTweet = new TWEET(newTweet);
+        addTweetToUser(newTweet.owner, newTweet);
         newTweet.save()
         .then(response => res.json(response))
         .catch(response => res.status(400).send('Tweet was not created'));

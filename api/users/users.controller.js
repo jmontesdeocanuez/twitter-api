@@ -1,6 +1,7 @@
 const USER = require('./users.model');
 const sendmail = require('sendmail')();
 
+
 function checkSession(req){
     if(req.session.views){
         req.session.views++;
@@ -16,6 +17,13 @@ function checkSession(req){
         })
 
     }
+}
+
+function addTweetToUser(owner, tweet){
+    USER.findOne({"username": owner}, (err, user) => {
+        user.tweets = [...user.tweets, tweet];
+        user.save();
+    });
 }
 
 function getAllUsers(req, res) {
@@ -86,5 +94,5 @@ function createUser(req, res) {
 }
 
 module.exports = {
-    getAllUsers, getUserByUsername, deleteUserByUsername, modifyUserByUsername, createUser
+    getAllUsers, getUserByUsername, deleteUserByUsername, modifyUserByUsername, createUser, addTweetToUser
 }
